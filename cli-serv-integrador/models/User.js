@@ -4,10 +4,6 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 const UserSchema = new Schema({
-	name: {
-		type: String,
-		required: [true, 'Please add a name.'],
-	},
 	email: {
 		type: String,
 		required: [true, 'Please add an email.'],

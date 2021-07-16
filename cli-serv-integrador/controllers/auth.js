@@ -4,6 +4,7 @@ const asyncHandler = require('../middlewares/asyncHandler');
 const ErrorResponse = require('../utils/errorResponse');
 const sendEmail = require('../utils/sendEmail');
 const User = require('../models/User');
+const Business = require('../models/Business');
 
 /**
  * @swagger
@@ -71,14 +72,23 @@ const User = require('../models/User');
  *         description: Invalid Email or Password.
  */
 exports.register = asyncHandler(async (req, res, next) => {
-	const { name, email, password, role } = req.body;
+	const { businessName, email, password, cuit } = req.body;
 
 	const user = await User.create({
-		name,
 		email,
 		password,
-		role,
+		role: 'user',
 	});
+
+	if (user) {
+		const { _id } = user;
+		const business = await Business.create({
+			cuit,
+			businessName,
+			user: _id,
+		});
+		console.log(business);
+	}
 
 	sendTokenResponse(user, 200, res);
 });
@@ -303,8 +313,12 @@ const sendTokenResponse = (user, statusCode, res) => {
 		options.secure = true;
 	}
 
-	res.status(statusCode).cookie('token', token, options).json({
-		success: true,
-		token,
-	});
+	res
+		.status(statusCode)
+		.cookie('token', token, options)
+		.json({
+			success: true,
+			token,
+			role: user.role || '',
+		});
 };
